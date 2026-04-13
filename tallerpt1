@@ -1,0 +1,157 @@
+import java.util.*;
+
+// Clase Arista
+class Arista implements Comparable<Arista> {
+    int origen, destino, peso;
+
+    public Arista(int o, int d, int p) {
+        origen = o;
+        destino = d;
+        peso = p;
+    }
+
+    @Override
+    public int compareTo(Arista otra) {
+        return this.peso - otra.peso;
+    }
+}
+
+// Clase Grafo
+class Grafo {
+    int numVertices;
+    List<Arista> listaAristas;
+
+    public Grafo(int n) {
+        numVertices = n;
+        listaAristas = new ArrayList<>();
+    }
+
+    public void agregarArista(int o, int d, int p) {
+        listaAristas.add(new Arista(o, d, p));
+    }
+
+    // ================= KRUSKAL =================
+    public int calcularKruskal() {
+        Collections.sort(listaAristas);
+
+        int[] padre = new int[numVertices];
+        for (int i = 0; i < numVertices; i++) {
+            padre[i] = i;
+        }
+
+        int total = 0;
+        int descartadas = 0;
+
+        System.out.println("\n--- KRUSKAL ---");
+
+        for (Arista a : listaAristas) {
+            int r1 = buscar(padre, a.origen);
+            int r2 = buscar(padre, a.destino);
+
+            if (r1 != r2) {
+                System.out.println("Se añade: " + a.origen + " - " + a.destino + " (" + a.peso + ")");
+                total += a.peso;
+                unir(padre, r1, r2);
+            } else {
+                descartadas++;
+            }
+        }
+
+        System.out.println("Costo total: " + total);
+        System.out.println("Aristas ignoradas: " + descartadas);
+
+        return total;
+    }
+
+    private int buscar(int[] padre, int i) {
+        if (padre[i] == i)
+            return i;
+        return padre[i] = buscar(padre, padre[i]);
+    }
+
+    private void unir(int[] padre, int x, int y) {
+        padre[x] = y;
+    }
+
+    // ================= PRIM =================
+    public int calcularPrim(int inicio) {
+        int[][] matriz = new int[numVertices][numVertices];
+
+        // llenar matriz
+        for (Arista a : listaAristas) {
+            matriz[a.origen][a.destino] = a.peso;
+            matriz[a.destino][a.origen] = a.peso;
+        }
+
+        boolean[] visitado = new boolean[numVertices];
+        int[] menorPeso = new int[numVertices];
+        int[] previo = new int[numVertices];
+
+        Arrays.fill(menorPeso, Integer.MAX_VALUE);
+        menorPeso[inicio] = 0;
+        previo[inicio] = -1;
+
+        int suma = 0;
+
+        System.out.println("\n--- PRIM desde nodo " + inicio + " ---");
+
+        for (int i = 0; i < numVertices; i++) {
+            int actual = seleccionarMin(menorPeso, visitado);
+            visitado[actual] = true;
+            suma += menorPeso[actual];
+
+            if (previo[actual] != -1) {
+                System.out.println("Se conecta: " + previo[actual] + " - " + actual +
+                        " (" + matriz[actual][previo[actual]] + ")");
+            }
+
+            for (int j = 0; j < numVertices; j++) {
+                if (matriz[actual][j] != 0 && !visitado[j] && matriz[actual][j] < menorPeso[j]) {
+                    menorPeso[j] = matriz[actual][j];
+                    previo[j] = actual;
+                }
+            }
+        }
+
+        System.out.println("Costo total: " + suma);
+        return suma;
+    }
+
+    private int seleccionarMin(int[] pesos, boolean[] visitado) {
+        int min = Integer.MAX_VALUE;
+        int pos = -1;
+
+        for (int i = 0; i < numVertices; i++) {
+            if (!visitado[i] && pesos[i] < min) {
+                min = pesos[i];
+                pos = i;
+            }
+        }
+        return pos;
+    }
+}
+
+// Clase principal
+public class Main {
+    public static void main(String[] args) {
+
+        Grafo grafo = new Grafo(6);
+
+        grafo.agregarArista(0, 1, 6);
+        grafo.agregarArista(0, 2, 1);
+        grafo.agregarArista(0, 3, 5);
+        grafo.agregarArista(1, 2, 2);
+        grafo.agregarArista(1, 4, 5);
+        grafo.agregarArista(2, 3, 2);
+        grafo.agregarArista(2, 4, 6);
+        grafo.agregarArista(3, 5, 4);
+        grafo.agregarArista(4, 5, 3);
+
+        // Ejecutar Prim desde diferentes nodos
+        grafo.calcularPrim(0);
+        grafo.calcularPrim(2);
+
+        // Ejecutar Kruskal
+        grafo.calcularKruskal();
+    }
+}
