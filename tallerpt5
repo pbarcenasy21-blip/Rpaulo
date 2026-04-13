@@ -1,0 +1,122 @@
+import java.util.*;
+
+public class RutaMinima {
+
+    // Representa una conexión en el grafo
+    static class Conexion implements Comparable<Conexion> {
+        int destino, peso;
+
+        public Conexion(int d, int p) {
+            destino = d;
+            peso = p;
+        }
+
+        @Override
+        public int compareTo(Conexion otro) {
+            return Integer.compare(this.peso, otro.peso);
+        }
+    }
+
+    public static void dijkstra(int total, List<List<Conexion>> grafo, int inicio) {
+
+        int[] costo = new int[total];
+        int[] previo = new int[total];
+
+        Arrays.fill(costo, Integer.MAX_VALUE);
+        Arrays.fill(previo, -1);
+
+        costo[inicio] = 0;
+
+        PriorityQueue<Conexion> cola = new PriorityQueue<>();
+        cola.add(new Conexion(inicio, 0));
+
+        while (!cola.isEmpty()) {
+
+            Conexion actual = cola.poll();
+            int nodoActual = actual.destino;
+
+            for (Conexion vecino : grafo.get(nodoActual)) {
+
+                int nuevoCosto = costo[nodoActual] + vecino.peso;
+
+                if (nuevoCosto < costo[vecino.destino]) {
+                    costo[vecino.destino] = nuevoCosto;
+                    previo[vecino.destino] = nodoActual;
+
+                    cola.add(new Conexion(vecino.destino, nuevoCosto));
+                }
+            }
+        }
+
+        mostrarResultados(costo, previo, inicio);
+    }
+
+    private static void mostrarResultados(int[] costo, int[] previo, int origen) {
+
+        System.out.println("=== RESULTADOS DIJKSTRA ===");
+        System.out.println("Nodo inicial: " + origen);
+
+        for (int i = 0; i < costo.length; i++) {
+
+            System.out.print("Destino " + i + " -> ");
+
+            if (costo[i] == Integer.MAX_VALUE) {
+                System.out.println("No alcanzable");
+                continue;
+            }
+
+            System.out.print("Costo: " + costo[i] + " | Ruta: ");
+            imprimirRuta(previo, i);
+            System.out.println();
+        }
+    }
+
+    private static void imprimirRuta(int[] previo, int destino) {
+        List<Integer> ruta = new LinkedList<>();
+
+        int actual = destino;
+        while (actual != -1) {
+            ruta.add(0, actual);
+            actual = previo[actual];
+        }
+
+        for (int i = 0; i < ruta.size(); i++) {
+            System.out.print(ruta.get(i));
+            if (i < ruta.size() - 1) System.out.print(" -> ");
+        }
+    }
+
+    private static List<List<Conexion>> crearGrafo(int n) {
+        List<List<Conexion>> grafo = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            grafo.add(new ArrayList<>());
+        }
+
+        // conexiones
+        grafo.get(0).add(new Conexion(1, 10));
+        grafo.get(0).add(new Conexion(4, 3));
+
+        grafo.get(1).add(new Conexion(2, 2));
+        grafo.get(1).add(new Conexion(4, 4));
+
+        grafo.get(2).add(new Conexion(3, 9));
+
+        grafo.get(3).add(new Conexion(2, 7));
+
+        grafo.get(4).add(new Conexion(1, 1));
+        grafo.get(4).add(new Conexion(2, 8));
+        grafo.get(4).add(new Conexion(3, 2));
+
+        return grafo;
+    }
+
+    public static void main(String[] args) {
+
+        int nodos = 5;
+
+        List<List<Conexion>> grafo = crearGrafo(nodos);
+
+        dijkstra(nodos, grafo, 0);
+    }
+}
