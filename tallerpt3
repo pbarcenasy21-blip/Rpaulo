@@ -1,0 +1,80 @@
+import java.util.*;
+
+public class RutaBFS {
+
+    public static void buscarRuta(int nodos, int[][] enlaces, int origen, int destino) {
+
+        List<List<Integer>> grafo = construirGrafo(nodos, enlaces);
+
+        Queue<Integer> fila = new LinkedList<>();
+        boolean[] visitados = new boolean[nodos];
+        int[] anterior = new int[nodos];
+
+        Arrays.fill(anterior, -1);
+
+        fila.offer(origen);
+        visitados[origen] = true;
+
+        while (!fila.isEmpty()) {
+            int actual = fila.poll();
+
+            if (actual == destino) {
+                break;
+            }
+
+            for (int vecino : grafo.get(actual)) {
+                if (!visitados[vecino]) {
+                    visitados[vecino] = true;
+                    anterior[vecino] = actual;
+                    fila.offer(vecino);
+                }
+            }
+        }
+
+        imprimirRuta(anterior, origen, destino);
+    }
+
+    private static List<List<Integer>> construirGrafo(int n, int[][] enlaces) {
+        List<List<Integer>> grafo = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            grafo.add(new ArrayList<>());
+        }
+
+        for (int[] e : enlaces) {
+            grafo.get(e[0]).add(e[1]);
+            grafo.get(e[1]).add(e[0]);
+        }
+
+        return grafo;
+    }
+
+    private static void imprimirRuta(int[] anterior, int inicio, int fin) {
+        List<Integer> recorrido = new LinkedList<>();
+
+        int actual = fin;
+
+        while (actual != -1) {
+            recorrido.add(0, actual); // insertar al inicio
+            actual = anterior[actual];
+        }
+
+        System.out.println("Ruta más corta encontrada:");
+        for (int i = 0; i < recorrido.size(); i++) {
+            System.out.print(recorrido.get(i));
+            if (i < recorrido.size() - 1) {
+                System.out.print(" -> ");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        int[][] enlaces = {
+            {0,1}, {0,2}, {1,3},
+            {2,3}, {3,4}, {4,5}
+        };
+
+        buscarRuta(6, enlaces, 0, 5);
+    }
+}
