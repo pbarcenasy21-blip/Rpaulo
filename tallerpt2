@@ -1,0 +1,28 @@
+import java.util.*;
+
+public class PrimVersion2 {
+
+    // Representa una conexión entre nodos
+    static class Conexion implements Comparable<Conexion> {
+        int desde, hacia, costo;
+
+        public Conexion(int d, int h, int c) {
+            desde = d;
+            hacia = h;
+            costo = c;
+        }
+
+        @Override
+        public int compareTo(Conexion o) {
+            return Integer.compare(this.costo, o.costo);
+        }
+    }
+
+    public static void resolverPrim(int totalNodos, List<List<Conexion>> grafo, int inicio) {
+
+        boolean[] marcados = new boolean[totalNodos];
+        PriorityQueue<Conexion> cola = new PriorityQueue<>();
+
+        int acumulado = 0;
+
+        System.out.println("\
